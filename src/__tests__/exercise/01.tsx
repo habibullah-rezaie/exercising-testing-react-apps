@@ -17,6 +17,10 @@ interface IglobalThis {
 declare var global: IglobalThis
 global.IS_REACT_ACT_ENVIRONMENT = true
 
+beforeEach(() => {
+  document.body.innerHTML = ''
+})
+
 test('counter increments and decrements when the buttons are clicked', () => {
   const divElement = document.createElement('div')
   console.log(document)
@@ -48,7 +52,6 @@ test('counter increments and decrements when the buttons are clicked', () => {
   })
   expect(counterMsg?.textContent).toBe('Current count: 0')
 
-  divElement.remove()
 })
 
 /* eslint no-unused-vars:0 */
