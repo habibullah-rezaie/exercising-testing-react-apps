@@ -22,6 +22,7 @@ test('submitting the form calls onSubmit with username and password', async () =
 
   await userEvent.click(submitBtn)
   expect(handleSubmit).toHaveBeenCalledWith(loginTestData)
+  expect(handleSubmit).toHaveBeenCalledTimes(1)
 })
 
 function buildLoginForm() {
