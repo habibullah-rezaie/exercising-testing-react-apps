@@ -8,13 +8,8 @@ import * as React from 'react'
 import Login from '../../components/login'
 
 test('submitting the form calls onSubmit with username and password', async () => {
-  const {
-    handleSubmit,
-    passwordField,
-    usernameField,
-    loginTestData,
-    submitBtn,
-  } = buildLoginForm()
+  const {handleSubmit, passwordField, usernameField, loginTestData, submitBtn} =
+    buildLoginForm({password: 'Akjfslkfew909809rw.kljf'}) // Overwrite the password to have a strong password
 
   console.dir(loginTestData)
   await userEvent.type(passwordField, loginTestData.password)
@@ -25,10 +20,10 @@ test('submitting the form calls onSubmit with username and password', async () =
   expect(handleSubmit).toHaveBeenCalledTimes(1)
 })
 
-function buildLoginForm() {
+function buildLoginForm(loginData?: {username?: string; password?: string}) {
   const loginTestData = {
-    username: faker.internet.userName(),
-    password: faker.internet.password(),
+    username: loginData?.username || faker.internet.userName(),
+    password: loginData?.password || faker.internet.password(),
   }
 
   const handleSubmit = jest.fn()
