@@ -1,14 +1,13 @@
 // mocking HTTP requests
 // http://localhost:3000/login-submission
 
-import * as React from 'react'
+import {build, fake} from '@jackfranklin/test-data-bot'
 import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import {build, fake} from '@jackfranklin/test-data-bot'
-// 🐨 you'll need to import rest from 'msw' and setupServer from msw/node
-import Login from '../../components/login-submission'
-import {setupServer} from 'msw/node'
 import {rest, RestRequest} from 'msw'
+import {setupServer} from 'msw/node'
+import * as React from 'react'
+import Login from '../../components/login-submission'
 
 const buildLoginForm = build<{username: string; password: string}>({
   fields: {
@@ -26,6 +25,14 @@ const server = setupServer(
       ctx,
     ) => {
       const {username, password} = req.body
+
+      if (!password) {
+        return res(ctx.status(400), ctx.json({message: 'password required'}))
+      }
+
+      if (!username) {
+        return res(ctx.status(400), ctx.json({message: 'username required'}))
+      }
       return res(ctx.json({username}), ctx.status(200))
     },
   ),
@@ -43,9 +50,23 @@ test(`logging in displays the user's username`, async () => {
   await userEvent.type(screen.getByLabelText(/password/i), password)
   await userEvent.click(screen.getByRole('button', {name: /submit/i}))
 
-  await waitForElementToBeRemoved(
-    () => screen.getByRole('generic', {name: 'loading...'})
+  await waitForElementToBeRemoved(() =>
+    screen.getByRole('generic', {name: 'loading...'}),
   )
 
   expect(screen.getByText(RegExp(`${username}`, 'i'))).toBeInTheDocument()
+})
+
+test(`Omitting the password reults in error`, async () => {
+  render(<Login />)
+  const {username} = buildLoginForm()
+
+  await userEvent.type(screen.getByLabelText(/username/i), username)
+  await userEvent.click(screen.getByRole('button', {name: /submit/i}))
+
+  await waitForElementToBeRemoved(() =>
+    screen.getByRole('generic', {name: 'loading...'}),
+  )
+
+  expect(screen.getByRole('alert')).toHaveTextContent(/password required/i)
 })
