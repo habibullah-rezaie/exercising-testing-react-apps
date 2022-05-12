@@ -70,3 +70,26 @@ test(`Omitting the password reults in error`, async () => {
     `"password required"`,
   )
 })
+
+test(`Testing reselience when server sends 500`, async () => {
+  render(<Login />)
+  const testErrorMsg = 'Something very bad happend in the backend'
+
+  server.use(
+    rest.post(
+      'https://auth-provider.example.com/api/login',
+      async (req, res, ctx) => {
+        return res(ctx.status(500), ctx.json({message: testErrorMsg}))
+      },
+    ),
+  )
+
+  const {username} = buildLoginForm()
+  await userEvent.type(screen.getByLabelText(/username/i), username)
+  await userEvent.click(screen.getByRole('button', {name: /submit/i}))
+
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
+
+  screen.debug()
+  expect(screen.getByRole('alert').textContent).toBe(testErrorMsg)
+})
