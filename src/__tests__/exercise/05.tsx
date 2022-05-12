@@ -64,9 +64,9 @@ test(`Omitting the password reults in error`, async () => {
   await userEvent.type(screen.getByLabelText(/username/i), username)
   await userEvent.click(screen.getByRole('button', {name: /submit/i}))
 
-  await waitForElementToBeRemoved(() =>
-    screen.getByRole('generic', {name: 'loading...'}),
-  )
+  await waitForElementToBeRemoved(() => screen.getByLabelText(/loading/i))
 
-  expect(screen.getByRole('alert')).toHaveTextContent(/password required/i)
+  expect(screen.getByRole('alert').textContent).toMatchInlineSnapshot(
+    `"password required"`,
+  )
 })
