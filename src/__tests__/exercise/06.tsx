@@ -4,44 +4,33 @@
 import {render, screen, waitForElementToBeRemoved} from '@testing-library/react'
 import * as React from 'react'
 import Location from '../../examples/location'
+import {useCurrentPosition} from 'react-use-geolocation'
+import {act} from 'react-dom/test-utils'
+import {mocked} from 'ts-jest/utils'
 
-const mockedGeolocation = {getCurrentPosition: jest.fn()}
-
-beforeAll(() => {
-  Object.defineProperty(window.navigator, 'geolocation', {
-    value: mockedGeolocation,
-  })
-})
-
-function deferred() {
-  let resolve: undefined | ((value?: unknown) => void)
-  let reject: undefined | ((value?: unknown) => void)
-
-  const promise = new Promise((res, rej) => {
-    resolve = res
-    reject = rej
-  })
-  return {promise, resolve, reject}
-}
+jest.mock('react-use-geolocation')
+const mockedUseCurrentPosition = mocked(useCurrentPosition)
 
 test('displays the users current location', async () => {
   const fakePosition = {coords: {latitude: 0, longitude: 3}}
 
-  const {promise, resolve} = deferred()
+  type Position = {coords: {latitude: number; longitude: number}}
 
-  mockedGeolocation.getCurrentPosition.mockImplementation(onSuccess => {
-    promise.then(() => {
-      onSuccess(fakePosition)
-    })
+  let setCurrentPosition: React.Dispatch<React.SetStateAction<Position | null>>
+  mockedUseCurrentPosition.mockImplementation(() => {
+    const [position, setPosition] = React.useState<Position | null>(null)
+
+    setCurrentPosition = setPosition
+    return [position, null]
   })
 
   render(<Location />)
   const loadingSpinner = screen.getByLabelText(/loading/i)
   expect(loadingSpinner).toBeInTheDocument()
 
-  resolve && resolve()
-
-  await waitForElementToBeRemoved(loadingSpinner)
+  act(() => {
+    setCurrentPosition(fakePosition)
+  })
 
   expect(loadingSpinner).not.toBeInTheDocument()
 
