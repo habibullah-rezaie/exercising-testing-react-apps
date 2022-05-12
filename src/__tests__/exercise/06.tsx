@@ -43,3 +43,15 @@ test('displays the users current location', async () => {
     `Longitude: ${fakePosition.coords.longitude}`,
   )
 })
+
+test('Displays error when failing getting position', async () => {
+  const fakePosition = {coords: {latitude: 23, longitude: 130}} // check even if a position is availabe alongside an error
+  const errorMsg = 'Getting geolocation failed!'
+  mockedUseCurrentPosition.mockImplementation(() => {
+    return [fakePosition, new Error(errorMsg)]
+  })
+
+  render(<Location />)
+
+  expect(screen.getByRole('alert')).toHaveTextContent(errorMsg)
+})
