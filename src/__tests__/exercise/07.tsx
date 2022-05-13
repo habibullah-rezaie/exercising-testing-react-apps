@@ -6,6 +6,13 @@ import {render, screen} from '@testing-library/react'
 import {ThemeProvider} from '../../components/theme'
 import EasyButton from '../../components/easy-button'
 
+function renderWithTheme(comp: JSX.Element, theme: string) {
+  function Wrapper({children}: React.PropsWithChildren<{}>) {
+    return <ThemeProvider initialTheme={theme}>{children}</ThemeProvider>
+  }
+  return render(comp, {wrapper: Wrapper})
+}
+
 type Themes = {
   dark: React.CSSProperties
   light: React.CSSProperties
@@ -18,30 +25,25 @@ const themeStyles: Themes = {
   },
 }
 test('renders with the light styles for the light theme', () => {
-  const initialTheme = 'light'
-  function Wrapper({children}: React.PropsWithChildren<{}>) {
-    return <ThemeProvider initialTheme={initialTheme}>{children}</ThemeProvider>
-  }
+  const lightTheme = 'light'
 
-  render(<EasyButton>Easy</EasyButton>, {wrapper: Wrapper})
+  renderWithTheme(<EasyButton>Easy</EasyButton>, lightTheme)
   const button = screen.getByRole('button', {name: /easy/i})
   expect(button).toHaveStyle(`
-    background-color: ${themeStyles[initialTheme].backgroundColor};
-    color: ${themeStyles[initialTheme].color};
+    background-color: ${themeStyles[lightTheme].backgroundColor};
+    color: ${themeStyles[lightTheme].color};
   `)
 })
 
 test('renders with the dark styles for the dark theme', () => {
-  const initialTheme = 'dark'
-  function Wrapper({children}: React.PropsWithChildren<{}>) {
-    return <ThemeProvider initialTheme={initialTheme}>{children}</ThemeProvider>
-  }
+  const darkTheme = 'dark'
+  
 
-  render(<EasyButton>Easy</EasyButton>, {wrapper: Wrapper})
+  renderWithTheme(<EasyButton>Easy</EasyButton>, darkTheme)
   const button = screen.getByRole('button', {name: /easy/i})
   expect(button).toHaveStyle(`
-    background-color: ${themeStyles[initialTheme].backgroundColor};
-    color: ${themeStyles[initialTheme].color};
+    background-color: ${themeStyles[darkTheme].backgroundColor};
+    color: ${themeStyles[darkTheme].color};
   `)
 })
 /* eslint no-unused-vars:0 */
