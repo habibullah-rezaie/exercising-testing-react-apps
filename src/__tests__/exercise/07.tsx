@@ -38,4 +38,21 @@ test('renders with the dark styles for the dark theme', () => {
   `)
 })
 
+test('Changes the theme on demand', () => {
+  const lightTheme = 'light'
+  const {rerender} = render(<EasyButton>Easy</EasyButton>, {theme: lightTheme})
+  const button = screen.getByRole('button', {name: /easy/i})
+  expect(button).toHaveStyle(`
+    background-color: ${themeStyles[lightTheme].backgroundColor};
+    color: ${themeStyles[lightTheme].color};
+  `)
+
+  const secondTheme = 'dark'
+  rerender(<EasyButton intialTheme={secondTheme}>Easy</EasyButton>)
+  expect(button).toHaveStyle(`
+    background-color: ${themeStyles[lightTheme].backgroundColor};
+    color: ${themeStyles[lightTheme].color};
+  `)
+})
+
 /* eslint no-unused-vars:0 */
