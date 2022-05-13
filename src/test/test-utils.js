@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {render as rtlRender} from '@testing-library/react'
-import {ThemeProvider} from 'components/theme'
+import {ThemeProvider} from './../../src/components/theme'
 
 function render(ui, {theme = 'light', ...options} = {}) {
   const Wrapper = ({children}) => (
