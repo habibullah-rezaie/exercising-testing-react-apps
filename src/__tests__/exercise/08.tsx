@@ -1,37 +1,35 @@
 // testing custom hooks
 // http://localhost:3000/counter-hook
 
+import { act, render } from '@testing-library/react'
 import * as React from 'react'
-import {render, screen} from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import useCounter from '../../components/use-counter'
 
-function Counter({initialCount = 0, step = 1}: {initialCount?: number, step?: number}) {
-  const {count, increment, decrement} = useCounter({initialCount, step})
-
-  return (
-    <div>
-      <button aria-label="increment" onClick={increment}>+</button>
-      <div>count: {count}</div>
-      <button aria-label="decrement" onClick={decrement}>-</button>
-    </div>
-  )
-}
-
 test('exposes the count and increment/decrement functions', async () => {
-  render(<Counter />)
+  let count: number | undefined = undefined
+  let increment: () => void = () => {}
+  let decrement: () => void = () => {}
 
-  const increment = screen.getByLabelText(/increment/i)
-  const decrement = screen.getByLabelText(/decrement/i)
-  const count = screen.getByText(/count:/i)
+  function TestComponent({
+    initialCount = 0,
+    step = 1,
+  }: {
+    initialCount?: number
+    step?: number
+  }) {
+    ;({count, increment, decrement} = useCounter({initialCount, step}))
 
-  expect(count).toHaveTextContent(`count: 0`)
+    return null
+  }
 
-  await userEvent.click(increment)
-  expect(count).toHaveTextContent(`count: ${1}`)
+  render(<TestComponent />)
 
-  screen.debug()
+  expect(count).toBe(0)
 
-  await userEvent.click(decrement)
-  expect(count).toHaveTextContent(`count: ${0}`)
+  console.log(increment)
+  act(() => increment())
+  expect(count).toBe(1)
+
+  act(() => decrement())
+  expect(count).toBe(0)
 })
